@@ -149,10 +149,10 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         for email in github_response:
             if email['verified']:
                 if re.match(self.application.options.auth, email['email']):
-                    logger.debug('Email %s is in auth setting.')
+                    logger.debug('Email %s is in auth setting.', email['email'])
                     emails.append(email['email'].lower())
                 else:
-                    logger.debug('Email %s is not in auth setting.')
+                    logger.debug('Email %s is not in auth setting.', email['email'])
 
         logger.debug('Got user emails: %s', emails)
 
