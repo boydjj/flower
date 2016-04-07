@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import json
+import logging
 import functools
 import re
 
@@ -17,6 +18,8 @@ from tornado.options import options
 from celery.utils.imports import instantiate
 
 from ..views import BaseHandler
+
+logger = logging.getLogger(__name__)
 
 
 class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
@@ -138,8 +141,13 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                      'User-agent': 'Tornado auth'})
         response = httpclient.HTTPClient().fetch(req)
 
-        emails = [email['email'].lower() for email in json.loads(response.body.decode('utf-8'))
+        github_response = json.loads(response.body.decode('utf-8'))
+        logger.debug('User email response: %s', github_response)
+
+        emails = [email['email'].lower() for email in github_response
                   if email['verified'] and re.match(self.application.options.auth, email['email'])]
+
+        logger.debug('Got user emails: %s', emails)
 
         if not emails:
             message = (
